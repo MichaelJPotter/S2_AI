@@ -1,5 +1,4 @@
-
-#pip install ucimlrepo
+# pip install ucimlrepo
 from ucimlrepo import fetch_ucirepo 
 
 # Import necessary libraries
@@ -10,6 +9,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, roc_auc_score
 from imblearn.over_sampling import SMOTE  # For handling class imbalance
 import numpy as np
+import time
 
 # fetch dataset 
 cdc_diabetes_health_indicators = fetch_ucirepo(id=891) 
@@ -39,8 +39,8 @@ print(y.isnull().sum())  # Missing values in target
 # Summary statistics of numerical features
 print(X.describe())
 
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
+# Convert y to a 1D array
+y = y.values.ravel()  # Ensures the target is a 1D array
 
 # Split data into training and testing sets
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
@@ -57,14 +57,25 @@ X_test_scaled = scaler.transform(X_test)
 # Hyperparameter tuning for Logistic Regression
 logistic_model = LogisticRegression(random_state=42)
 param_grid_lr = {'C': [0.1, 1, 10], 'solver': ['liblinear', 'lbfgs']}
-grid_search_lr = GridSearchCV(logistic_model, param_grid_lr, cv=5, scoring='accuracy')
+
+# Timing the GridSearch for Logistic Regression
+start_time_lr = time.time()
+grid_search_lr = GridSearchCV(
+    logistic_model, 
+    param_grid_lr, 
+    cv=5, 
+    scoring='accuracy', 
+    n_jobs=-1  # Parallel processing
+)
 grid_search_lr.fit(X_train_scaled, y_train_resampled)
+end_time_lr = time.time()
 
 # Best Logistic Regression model
 best_lr_model = grid_search_lr.best_estimator_
 y_pred_logistic = best_lr_model.predict(X_test_scaled)
 
 print("Logistic Regression Results")
+print(f"Grid Search Time: {end_time_lr - start_time_lr:.2f} seconds")
 print("Best Parameters:", grid_search_lr.best_params_)
 print("Accuracy:", accuracy_score(y_test, y_pred_logistic))
 print("Classification Report:\n", classification_report(y_test, y_pred_logistic))
@@ -79,14 +90,25 @@ param_grid_rf = {
     'min_samples_split': [2, 5],
     'max_features': ['sqrt', 'log2']
 }
-grid_search_rf = GridSearchCV(rf_model, param_grid_rf, cv=5, scoring='accuracy')
+
+# Timing the GridSearch for Random Forest
+start_time_rf = time.time()
+grid_search_rf = GridSearchCV(
+    rf_model, 
+    param_grid_rf, 
+    cv=5, 
+    scoring='accuracy', 
+    n_jobs=-1  # Parallel processing
+)
 grid_search_rf.fit(X_train_resampled, y_train_resampled)
+end_time_rf = time.time()
 
 # Best Random Forest model
 best_rf_model = grid_search_rf.best_estimator_
 y_pred_rf = best_rf_model.predict(X_test)
 
 print("\nRandom Forest Results")
+print(f"Grid Search Time: {end_time_rf - start_time_rf:.2f} seconds")
 print("Best Parameters:", grid_search_rf.best_params_)
 print("Accuracy:", accuracy_score(y_test, y_pred_rf))
 print("Classification Report:\n", classification_report(y_test, y_pred_rf))
