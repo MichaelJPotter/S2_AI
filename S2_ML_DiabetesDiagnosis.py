@@ -17,7 +17,7 @@ cdc_diabetes_health_indicators = fetch_ucirepo(id=891)
 # data (as pandas data frames) 
 X = cdc_diabetes_health_indicators.data.features 
 y = cdc_diabetes_health_indicators.data.targets 
-  
+
 # metadata 
 print(cdc_diabetes_health_indicators.metadata) 
   
