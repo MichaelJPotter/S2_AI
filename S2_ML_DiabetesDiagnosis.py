@@ -1,3 +1,4 @@
+#ChatGPT prompt: I need to create two machine learning algorithm's to predict whether someone will or wont have diabetes using a dataset which I have imported I would like to do supervised learning, logical regression versus random forest 
 # pip install ucimlrepo
 from ucimlrepo import fetch_ucirepo 
 
